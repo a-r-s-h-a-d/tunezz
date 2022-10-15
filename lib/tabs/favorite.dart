@@ -1,74 +1,49 @@
+import 'package:animated_text_kit/animated_text_kit.dart';
+import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/material.dart';
-import 'package:music_player/widget/favorite_tile.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:music_player/data_model/songs.dart';
+import 'package:music_player/db_functions/db_functions.dart';
+import 'package:music_player/widget/music_tile.dart';
 
 class Favorites extends StatelessWidget {
-  const Favorites({super.key});
+  Favorites({super.key});
+  final Box<List> playlistBox = getPlaylistBox();
+  final Box<Songs> songBox = getSongBox();
+  final AssetsAudioPlayer audioPlayer = AssetsAudioPlayer.withId('0');
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Expanded(
-          child: ListView(
-            children: [
-              Column(
-                children: const [
-                  FavoriteListTile(
-                    imagePath: 'asset/images/2002.jpeg',
-                    song: '2002',
-                    artist: 'Anne-Marie',
-                  ),
-                  FavoriteListTile(
-                    imagePath: 'asset/images/21Guns.jpeg',
-                    song: '21 Guns',
-                    artist: 'Green Day',
-                  ),
-                  FavoriteListTile(
-                    imagePath: 'asset/images/A thousand Years.jpg',
-                    song: 'A thousand Years',
-                    artist: 'Christina Perri',
-                  ),
-                  FavoriteListTile(
-                    imagePath: 'asset/images/Arcade.jpeg',
-                    song: 'Arcade',
-                    artist: 'Duncan Laurence',
-                  ),
-                  FavoriteListTile(
-                    imagePath: 'asset/images/As it was.jpeg',
-                    song: 'As it was',
-                    artist: 'Harry Styles',
-                  ),
-                  FavoriteListTile(
-                    imagePath: 'asset/images/Blank space.jpeg',
-                    song: 'Blank Space',
-                    artist: 'Taylor Swift',
-                  ),
-                  FavoriteListTile(
-                    imagePath: 'asset/images/blinding lights.png',
-                    song: 'Binding Lights',
-                    artist: 'The Weekend',
-                  ),
-                  FavoriteListTile(
-                    imagePath: 'asset/images/can we kiss forever.jpeg',
-                    song: 'C.W.K.F?',
-                    artist: 'Kina,Adriana Horizon',
-                  ),
-                  FavoriteListTile(
-                    imagePath: 'asset/images/Goosebumps.jpeg',
-                    song: 'Goosebumps',
-                    artist: 'Travis Scott,HVME',
-                  ),
-                  FavoriteListTile(
-                    imagePath: 'asset/images/Happier.png',
-                    song: 'Happier',
-                    artist: 'Marshmello',
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ],
+    return ValueListenableBuilder(
+      valueListenable: playlistBox.listenable(),
+      builder: (BuildContext context, Box<List> value, Widget? child) {
+        List<Songs> songList = playlistBox.get('Favorites')!.toList().cast();
+        return (songList.isEmpty)
+            ? Center(
+                child: AnimatedTextKit(
+                  animatedTexts: [
+                    ScaleAnimatedText(
+                      'No Songs Found',
+                      textStyle: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20),
+                    ),
+                  ],
+                  repeatForever: true,
+                ),
+              )
+            : ListView.builder(
+                itemBuilder: (context, index) {
+                  return MusicListTile(
+                    audioPlayer: audioPlayer,
+                    index: index,
+                    songList: songList,
+                  );
+                },
+                itemCount: songList.length,
+              );
+      },
     );
   }
 }

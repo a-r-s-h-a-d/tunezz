@@ -1,15 +1,20 @@
+import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/material.dart';
-import 'package:music_player/screens/screen_search.dart';
 import 'package:music_player/screens/screen_settings.dart';
 import 'package:music_player/tabs/favorite.dart';
 import 'package:music_player/tabs/mymusic.dart';
 import 'package:music_player/tabs/playlist.dart';
 import 'package:music_player/widget/backgroundcolor.dart';
-import 'package:music_player/widget/mini_player.dart';
 
-class ScreenHome extends StatelessWidget {
+class ScreenHome extends StatefulWidget {
   const ScreenHome({super.key});
 
+  @override
+  State<ScreenHome> createState() => _ScreenHomeState();
+}
+
+class _ScreenHomeState extends State<ScreenHome> {
+  AssetsAudioPlayer audioPlayer = AssetsAudioPlayer.withId('0');
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
@@ -18,6 +23,7 @@ class ScreenHome extends StatelessWidget {
       child: Scaffold(
         extendBodyBehindAppBar: true,
         appBar: AppBar(
+          automaticallyImplyLeading: false,
           iconTheme: const IconThemeData(color: Colors.white),
           backgroundColor: Colors.transparent,
           elevation: 0,
@@ -39,8 +45,13 @@ class ScreenHome extends StatelessWidget {
           actions: [
             IconButton(
                 onPressed: () {
-                  Navigator.of(context).push(MaterialPageRoute(
-                      builder: ((context) => const ScreenSearch())));
+                  // Navigator.of(context).push(
+                  //   MaterialPageRoute(
+                  //     builder: ((context) => ScreenSearch(
+                  //           audioPlayer: audioPlayer,
+                  //         )),
+                  //   ),
+                  // );
                 },
                 icon: const Icon(Icons.search)),
             IconButton(
@@ -80,23 +91,18 @@ class ScreenHome extends StatelessWidget {
             gradient: bgColor(),
           ),
           child: Column(
-            children: const [
+            children: [
               Expanded(
                 child: SafeArea(
                   child: TabBarView(
                     children: [
-                      MyMusic(),
+                      MyMusic(audioPlayer: audioPlayer),
                       Favorites(),
-                      Playlist(),
+                      PlaylistTab(),
                     ],
                   ),
                 ),
               ),
-              Miniplayer(
-                imagePath: 'asset/images/Arcade.jpeg',
-                song: 'Arcade',
-                artist: 'Duncan Laurence',
-              )
             ],
           ),
         ),

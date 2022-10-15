@@ -1,10 +1,24 @@
+import 'package:animated_text_kit/animated_text_kit.dart';
+import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:music_player/data_model/songs.dart';
+import 'package:music_player/db_functions/db_functions.dart';
+import 'package:music_player/functions/recents.dart';
 import 'package:music_player/widget/backgroundcolor.dart';
 import 'package:music_player/widget/recent_most_played_tile.dart';
 
-class RecentlyPlayed extends StatelessWidget {
+class RecentlyPlayed extends StatefulWidget {
   const RecentlyPlayed({super.key});
 
+  @override
+  State<RecentlyPlayed> createState() => _RecentlyPlayedState();
+}
+
+class _RecentlyPlayedState extends State<RecentlyPlayed> {
+  Box<List> playlistBox = getPlaylistBox();
+  Box<Songs> songBox = getSongBox();
+  final AssetsAudioPlayer audioPlayer = AssetsAudioPlayer.withId('0');
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,31 +40,54 @@ class RecentlyPlayed extends StatelessWidget {
             fontWeight: FontWeight.bold,
           ),
         ),
+        actions: [
+          IconButton(
+              onPressed: () {
+                Recents.removefromrecentSongsList();
+              },
+              icon: const Icon(Icons.delete)),
+        ],
       ),
       body: Container(
-        decoration: BoxDecoration(
-          gradient: bgColor(),
-        ),
-        child: ListView(
-          children: const [
-            RecentlyPlayedTile(
-              imagePath: 'asset/images/2002.jpeg',
-              song: '2002',
-              artist: 'Anne-Marie',
-            ),
-            RecentlyPlayedTile(
-              imagePath: 'asset/images/21Guns.jpeg',
-              song: '21 Guns',
-              artist: 'Green Day',
-            ),
-            RecentlyPlayedTile(
-              imagePath: 'asset/images/Arcade.jpeg',
-              song: 'Arcade',
-              artist: 'Duncan Laurence',
-            ),
-          ],
-        ),
-      ),
+          decoration: BoxDecoration(
+            gradient: bgColor(),
+          ),
+          child: ValueListenableBuilder(
+            valueListenable: playlistBox.listenable(),
+            builder: (
+              BuildContext context,
+              Box<List> value,
+              Widget? child,
+            ) {
+              List<Songs> songList =
+                  playlistBox.get('Recents')!.toList().cast<Songs>();
+              return (songList.isEmpty)
+                  ? Center(
+                      child: AnimatedTextKit(
+                        animatedTexts: [
+                          ScaleAnimatedText(
+                            'No Songs Found',
+                            textStyle: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 20),
+                          ),
+                        ],
+                        repeatForever: true,
+                      ),
+                    )
+                  : ListView.builder(
+                      itemCount: songList.length,
+                      itemBuilder: (context, index) {
+                        return RecentTile(
+                          songList: songList,
+                          index: index,
+                          audioPlayer: audioPlayer,
+                        );
+                      },
+                    );
+            },
+          )),
     );
   }
 }

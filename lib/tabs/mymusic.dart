@@ -1,75 +1,69 @@
+import 'package:animated_text_kit/animated_text_kit.dart';
+import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:music_player/data_model/songs.dart';
+import 'package:music_player/db_functions/db_functions.dart';
 import 'package:music_player/widget/music_tile.dart';
 
-class MyMusic extends StatelessWidget {
-  const MyMusic({Key? key}) : super(key: key);
+class MyMusic extends StatefulWidget {
+  const MyMusic({
+    required this.audioPlayer,
+    Key? key,
+  }) : super(key: key);
+  final AssetsAudioPlayer audioPlayer;
+  @override
+  State<MyMusic> createState() => _MyMusicState();
+}
+
+class _MyMusicState extends State<MyMusic> {
+  Box<Songs> songBox = getSongBox();
+  // AssetsAudioPlayer audioPlayer = AssetsAudioPlayer.withId('0');
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
+    return Padding(
+      padding: const EdgeInsets.only(top: 10, bottom: 70),
+      child:
+          Column(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
         Expanded(
-          child: ListView(
-            children: [
-              Column(
-                children: const [
-                  MusicListTile(
-                    imagePath: 'asset/images/2002.jpeg',
-                    song: '2002',
-                    artist: 'Anne-Marie',
+          child: ValueListenableBuilder(
+            valueListenable: songBox.listenable(),
+            builder: (BuildContext context, Box<Songs> songBox, Widget? child) {
+              //final List<int> keys = songBox.keys.toList().cast<int>();
+              List<Songs> songList = [];
+              // for (var key in keys) {
+              //   songList.add(songBox.get(key)!);
+              // }
+              songList = songBox.values.toList().cast<Songs>();
+              if (songBox.values.isEmpty) {
+                return Center(
+                  child: AnimatedTextKit(
+                    animatedTexts: [
+                      ScaleAnimatedText(
+                        'No Songs Found',
+                        textStyle: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20),
+                      ),
+                    ],
+                    repeatForever: true,
                   ),
-                  MusicListTile(
-                    imagePath: 'asset/images/21Guns.jpeg',
-                    song: '21 Guns',
-                    artist: 'Green Day',
-                  ),
-                  MusicListTile(
-                    imagePath: 'asset/images/A thousand Years.jpg',
-                    song: 'A thousand Years',
-                    artist: 'Christina Perri',
-                  ),
-                  MusicListTile(
-                    imagePath: 'asset/images/Arcade.jpeg',
-                    song: 'Arcade',
-                    artist: 'Duncan Laurence',
-                  ),
-                  MusicListTile(
-                    imagePath: 'asset/images/As it was.jpeg',
-                    song: 'As it was',
-                    artist: 'Harry Styles',
-                  ),
-                  MusicListTile(
-                    imagePath: 'asset/images/Blank space.jpeg',
-                    song: 'Blank Space',
-                    artist: 'Taylor Swift',
-                  ),
-                  MusicListTile(
-                    imagePath: 'asset/images/blinding lights.png',
-                    song: 'Binding Lights',
-                    artist: 'The Weekend',
-                  ),
-                  MusicListTile(
-                    imagePath: 'asset/images/can we kiss forever.jpeg',
-                    song: 'C.W.K.F?',
-                    artist: 'Kina,Adriana Horizon',
-                  ),
-                  MusicListTile(
-                    imagePath: 'asset/images/Goosebumps.jpeg',
-                    song: 'Goosebumps',
-                    artist: 'Travis Scott,HVME',
-                  ),
-                  MusicListTile(
-                    imagePath: 'asset/images/Happier.png',
-                    song: 'Happier',
-                    artist: 'Marshmello',
-                  ),
-                ],
-              ),
-            ],
+                );
+              }
+              return ListView.builder(
+                itemBuilder: (context, index) => MusicListTile(
+                  audioPlayer: widget.audioPlayer,
+                  index: index,
+                  songList: songList,
+                ),
+                itemCount: songList.length,
+              );
+            },
           ),
         ),
-      ],
+      ]),
     );
   }
 }

@@ -3,8 +3,13 @@ import 'package:music_player/functions/dialogbiox.dart';
 import 'package:music_player/screens/screen_view_playlist.dart';
 
 class PlaylistTile extends StatelessWidget {
-  const PlaylistTile({super.key, required this.playlistname});
+  const PlaylistTile({
+    super.key,
+    required this.playlistname,
+    required this.songlength,
+  });
   final String playlistname;
+  final int songlength;
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -36,18 +41,18 @@ class PlaylistTile extends StatelessWidget {
                         icon: const Icon(Icons.edit, color: Colors.white),
                         onPressed: () =>
                             showPlaylistRenameAlertBox(context, playlistname)),
-                    // icon: const Icon(Icons.edit, color: Colors.white)),
                     IconButton(
-                        icon: const Icon(Icons.delete, color: Colors.white),
-                        onPressed: () =>
-                            showPlaylistDeleteAlertBox(context, playlistname)),
+                      icon: const Icon(Icons.delete, color: Colors.white),
+                      onPressed: () =>
+                          showPlaylistDeleteAlertBox(context, playlistname),
+                    ),
                   ],
                 ),
               ),
-              const ListTile(
+              ListTile(
                 leading: Text(
-                  '6 Songs',
-                  style: TextStyle(
+                  '$songlength Songs',
+                  style: const TextStyle(
                     color: Colors.white,
                   ),
                 ),
